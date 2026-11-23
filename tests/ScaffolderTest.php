@@ -42,9 +42,9 @@ final class ScaffolderTest extends TestCase {
   protected function tearDown(): void {
     FilesystemFaults::$operation = NULL;
     $entries = new RecursiveIteratorIterator(
-          new RecursiveDirectoryIterator($this->provider, RecursiveDirectoryIterator::SKIP_DOTS),
-          RecursiveIteratorIterator::CHILD_FIRST,
-      );
+      new RecursiveDirectoryIterator($this->provider, RecursiveDirectoryIterator::SKIP_DOTS),
+      RecursiveIteratorIterator::CHILD_FIRST,
+    );
     foreach ($entries as $entry) {
       if ($entry->isDir() && !$entry->isLink()) {
         rmdir($entry->getPathname());
@@ -62,9 +62,9 @@ final class ScaffolderTest extends TestCase {
   public function testMinimalStarter(): void {
     $files = (new Scaffolder())->generate($this->provider, ComponentSpec::fromJson(self::ID, '{}'), FALSE);
     self::assertSame(
-          ['components/teaser-card/teaser-card.twig', 'components/teaser-card/teaser-card.component.yml'],
-          $files,
-      );
+      ['components/teaser-card/teaser-card.twig', 'components/teaser-card/teaser-card.component.yml'],
+      $files,
+    );
     $metadata = Yaml::parseFile($this->provider . '/' . $files[1], Yaml::PARSE_OBJECT_FOR_MAP);
     self::assertSame('Teaser Card', $metadata->name);
     self::assertSame('object', $metadata->props->type);
@@ -78,18 +78,18 @@ final class ScaffolderTest extends TestCase {
   public function testTypedStarterRendersSlotsAndPreservesAttributes(): void {
     $label = "Editor's card: #1 🎉";
     [$twig, $scss, $css, $js, $metadata] = (new Scaffolder())->generate(
-          $this->provider,
-          ComponentSpec::fromJson(self::ID, json_encode([
-            'name' => $label,
-            'description' => '*Quoted* [description]',
-            'props' => ['title' => 'string', 'optional' => 'null', 'item_count' => 'integer'],
-            'required' => ['title'],
-            'slots' => ['body', 'on'],
-            'subdirectory' => 'layouts/cards',
-            'assets' => ['scss', 'css', 'js'],
-          ], JSON_THROW_ON_ERROR)),
-          FALSE,
-      );
+      $this->provider,
+      ComponentSpec::fromJson(self::ID, json_encode([
+        'name' => $label,
+        'description' => '*Quoted* [description]',
+        'props' => ['title' => 'string', 'optional' => 'null', 'item_count' => 'integer'],
+        'required' => ['title'],
+        'slots' => ['body', 'on'],
+        'subdirectory' => 'layouts/cards',
+        'assets' => ['scss', 'css', 'js'],
+      ], JSON_THROW_ON_ERROR)),
+      FALSE,
+    );
 
     $base = $this->provider . '/';
     self::assertSame('components/layouts/cards/teaser-card/teaser-card.twig', $twig);
@@ -169,9 +169,9 @@ final class ScaffolderTest extends TestCase {
    */
   public function testCommandDryRunWithStdin(): void {
     [$status, $output, $error] = $this->runCommand(
-          ['--dry-run', $this->provider, self::ID, '-'],
-          '{"subdirectory":"foo","slots":["body"]}',
-      );
+      ['--dry-run', $this->provider, self::ID, '-'],
+      '{"subdirectory":"foo","slots":["body"]}',
+    );
 
     self::assertSame(0, $status, $error);
     self::assertSame('', $error);
@@ -232,9 +232,9 @@ final class ScaffolderTest extends TestCase {
     self::assertStringContainsString('OK (2 tests,', $output);
 
     [$status, $output, $error] = $this->runCommand(
-          ['--with-unit-test', $this->provider, self::ID, '-'],
-          '{"props":{"title":"string","count":"integer"},"required":["title"],"slots":["body","footer"],"subdirectory":"cards/nested"}',
-      );
+      ['--with-unit-test', $this->provider, self::ID, '-'],
+      '{"props":{"title":"string","count":"integer"},"required":["title"],"slots":["body","footer"],"subdirectory":"cards/nested"}',
+    );
     self::assertSame(0, $status, $error);
     [$twig, $metadata, $test] = json_decode($output, TRUE, 512, JSON_THROW_ON_ERROR)['files'];
     [$status, $output] = $this->runGeneratedTest($test);
@@ -454,10 +454,10 @@ final class ScaffolderTest extends TestCase {
     $processes = [];
     foreach (['one', 'two'] as $group) {
       $process = proc_open(
-            [PHP_BINARY, __DIR__ . '/../scripts/scaffold.php', '--with-unit-test', $this->provider, self::ID, '-'],
-            [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
-            $pipes,
-        );
+        [PHP_BINARY, __DIR__ . '/../scripts/scaffold.php', '--with-unit-test', $this->provider, self::ID, '-'],
+        [0 => ['pipe', 'r'], 1 => ['pipe', 'w'], 2 => ['pipe', 'w']],
+        $pipes,
+      );
       self::assertIsResource($process);
       fwrite($pipes[0], json_encode(['subdirectory' => $group], JSON_THROW_ON_ERROR));
       fclose($pipes[0]);

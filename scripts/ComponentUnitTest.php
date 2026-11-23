@@ -122,7 +122,7 @@ TEST;
    *
    * @param array<array-key, string> $values
    *   The map or list to include in the test source.
-   *   */
+   */
   private static function exportArray(array $values): string {
     $entries = [];
     foreach ($values as $key => $value) {

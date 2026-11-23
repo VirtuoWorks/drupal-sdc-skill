@@ -68,8 +68,8 @@ final class Scaffolder {
     $root = "$provider/components";
     if (is_dir($root)) {
       $entries = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator($root, \RecursiveDirectoryIterator::SKIP_DOTS),
-        );
+        new \RecursiveDirectoryIterator($root, \RecursiveDirectoryIterator::SKIP_DOTS),
+      );
       foreach ($entries as $entry) {
         if ($entry->getFilename() === "$component.component.yml") {
           throw new \RuntimeException("Component '$component' already exists at '" . $entry->getPathname() . "'.");
@@ -138,18 +138,7 @@ final class Scaffolder {
         $metadata .= '    - ' . self::quote($prop) . "\n";
       }
     }
-    if ($spec->props === []) {
-      $metadata .= "  properties: {}\n";
-    }
-    else {
-      $metadata .= "  properties:\n";
-      foreach ($spec->props as $prop => $type) {
-        $title = ucwords(str_replace('_', ' ', $prop));
-        $metadata .= '    ' . self::quote($prop) . ":\n";
-        $metadata .= '      type: ' . self::quote($type) . "\n";
-        $metadata .= '      title: ' . self::quote($title) . "\n";
-      }
-    }
+    $metadata .= $this->renderProperties($spec->props);
 
     $twig = "<div{{ attributes.addClass('$component') }}>\n";
     if ($spec->slots !== []) {
@@ -181,15 +170,36 @@ final class Scaffolder {
 })(Drupal, once);
 
 JS;
+        continue;
       }
-      else {
-        $files["$component.$asset"] = ".$component {\n  /* Add component styles here. */\n}\n";
-      }
+
+      $files["$component.$asset"] = ".$component {\n  /* Add component styles here. */\n}\n";
     }
 
     // Write metadata after the template and assets it describes.
     $files["$component.component.yml"] = $metadata;
     return $files;
+  }
+
+  /**
+   * Renders the declared property names, types, and titles as YAML.
+   *
+   * @param array<string, string> $props
+   *   The JSON Schema types keyed by prop name.
+   */
+  private function renderProperties(array $props): string {
+    if ($props === []) {
+      return "  properties: {}\n";
+    }
+
+    $properties = "  properties:\n";
+    foreach ($props as $prop => $type) {
+      $title = ucwords(str_replace('_', ' ', $prop));
+      $properties .= '    ' . self::quote($prop) . ":\n";
+      $properties .= '      type: ' . self::quote($type) . "\n";
+      $properties .= '      title: ' . self::quote($title) . "\n";
+    }
+    return $properties;
   }
 
   /**
@@ -230,44 +240,74 @@ JS;
         $createdDirectories[] = $directory;
       }
 
-      foreach ($files as $name => $contents) {
-        $file = "$provider/$name";
-        $stream = @fopen($file, 'xb');
-        if ($stream === FALSE) {
-          throw new \RuntimeException("Cannot create file '$file'.");
-        }
-        $createdFiles[] = $file;
-        $written = @fwrite($stream, $contents);
-        fclose($stream);
-        if ($written !== strlen($contents)) {
-          throw new \RuntimeException("Cannot write complete file '$file'.");
-        }
-      }
+      $this->createFiles($provider, $files, $createdFiles);
     }
     catch (\Throwable $exception) {
-      $remaining = [];
-      foreach (array_reverse($createdFiles) as $file) {
-        if (!@unlink($file) && file_exists($file)) {
-          $remaining[] = $file;
-        }
-      }
-      foreach (array_reverse($createdDirectories) as $directory) {
-        if (!@rmdir($directory) && is_dir($directory)) {
-          $remaining[] = $directory;
-        }
-      }
+      $remaining = $this->removeCreatedPaths($createdFiles, $createdDirectories);
       if ($remaining !== []) {
         throw new \RuntimeException(
-              $exception->getMessage() . ' Could not clean up: ' . implode(', ', $remaining) . '.',
-              0,
-              $exception,
-          );
+        $exception->getMessage() . ' Could not clean up: ' . implode(', ', $remaining) . '.',
+        0,
+        $exception,
+        );
       }
       throw $exception;
     }
     finally {
       fclose($lock);
     }
+  }
+
+  /**
+   * Creates files exclusively and records each path before writing to it.
+   *
+   * @param string $provider
+   *   The canonical provider directory path.
+   * @param array<string, string> $files
+   *   The provider-relative paths and their contents.
+   * @param list<string> $createdFiles
+   *   The absolute paths to remove if this operation fails.
+   */
+  private function createFiles(string $provider, array $files, array &$createdFiles): void {
+    foreach ($files as $name => $contents) {
+      $file = "$provider/$name";
+      $stream = @fopen($file, 'xb');
+      if ($stream === FALSE) {
+        throw new \RuntimeException("Cannot create file '$file'.");
+      }
+      $createdFiles[] = $file;
+      $written = @fwrite($stream, $contents);
+      fclose($stream);
+      if ($written !== strlen($contents)) {
+        throw new \RuntimeException("Cannot write complete file '$file'.");
+      }
+    }
+  }
+
+  /**
+   * Removes newly created paths in reverse order after a failed write.
+   *
+   * @param list<string> $createdFiles
+   *   The absolute paths of files created by this run.
+   * @param list<string> $createdDirectories
+   *   The absolute paths of directories created by this run.
+   *
+   * @return list<string>
+   *   The absolute paths that could not be removed.
+   */
+  private function removeCreatedPaths(array $createdFiles, array $createdDirectories): array {
+    $remaining = [];
+    foreach (array_reverse($createdFiles) as $file) {
+      if (!@unlink($file) && file_exists($file)) {
+        $remaining[] = $file;
+      }
+    }
+    foreach (array_reverse($createdDirectories) as $directory) {
+      if (!@rmdir($directory) && is_dir($directory)) {
+        $remaining[] = $directory;
+      }
+    }
+    return $remaining;
   }
 
 }

@@ -63,8 +63,8 @@ HELP;
       $input = $args[2] ?? NULL;
       $json = match ($input) {
         NULL => '{}',
-                '-' => stream_get_contents($stdin),
-                default => $this->readSpecFile($input),
+        '-' => stream_get_contents($stdin),
+        default => $this->readSpecFile($input),
       };
       if ($json === FALSE) {
         throw new \RuntimeException('Cannot read the JSON declaration.');
@@ -75,9 +75,9 @@ HELP;
       $files = (new Scaffolder())->generate($path, $spec, $dryRun, isset($options['--with-unit-test']));
 
       fwrite($stdout, json_encode(
-            ['id' => $id, 'files' => $files, 'dry_run' => $dryRun],
-            JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
-        ) . "\n");
+        ['id' => $id, 'files' => $files, 'dry_run' => $dryRun],
+        JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
+      ) . "\n");
       return 0;
     }
     catch (\InvalidArgumentException | \JsonException | \RuntimeException $exception) {
