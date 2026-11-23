@@ -29,6 +29,8 @@ HELP;
   /**
    * Runs the command and returns its process exit code.
    *
+   * ComponentSpec uses a named constructor to validate the declaration.
+   *
    * @param list<string> $argv
    *   The command-line arguments, including the script name.
    * @param resource $stdin
@@ -37,6 +39,8 @@ HELP;
    *   The output stream for help and successful results.
    * @param resource $stderr
    *   The output stream for diagnostics.
+   *
+   * @SuppressWarnings(PHPMD.StaticAccess)
    */
   public function run(array $argv, $stdin, $stdout, $stderr): int {
     $args = array_slice($argv, 1);

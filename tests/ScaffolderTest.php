@@ -51,7 +51,7 @@ final class ScaffolderTest extends ProviderTestCase {
       ], JSON_THROW_ON_ERROR),
     );
     self::assertSame(0, $status, $error);
-    [$twig, $scss, $css, $js, $metadata] = json_decode($output, TRUE, 512, JSON_THROW_ON_ERROR)['files'];
+    [$twig, $scss, $css, $javascript, $metadata] = json_decode($output, TRUE, 512, JSON_THROW_ON_ERROR)['files'];
 
     $base = $this->provider . '/';
     self::assertSame('components/layouts/cards/teaser-card/teaser-card.twig', $twig);
@@ -66,7 +66,7 @@ final class ScaffolderTest extends ProviderTestCase {
     self::assertSame(['core/drupal', 'core/once'], $data['libraryOverrides']['dependencies']);
     self::assertStringContainsString('.teaser-card {', file_get_contents($base . $scss));
     self::assertSame(file_get_contents($base . $scss), file_get_contents($base . $css));
-    self::assertStringContainsString("once('my_theme:teaser-card', '.teaser-card', context)", file_get_contents($base . $js));
+    self::assertStringContainsString("once('my_theme:teaser-card', '.teaser-card', context)", file_get_contents($base . $javascript));
 
     $environment = new Environment(new ArrayLoader([
       'component.twig' => file_get_contents($base . $twig),
