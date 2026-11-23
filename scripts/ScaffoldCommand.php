@@ -59,7 +59,7 @@ HELP;
         throw new \InvalidArgumentException(self::USAGE);
       }
 
-      [$path, $id] = $args;
+      [$path, $componentId] = $args;
       $input = $args[2] ?? NULL;
       $json = match ($input) {
         NULL => '{}',
@@ -70,12 +70,12 @@ HELP;
         throw new \RuntimeException('Cannot read the JSON declaration.');
       }
 
-      $spec = ComponentSpec::fromJson($id, $json);
+      $spec = ComponentSpec::fromJson($componentId, $json);
       $dryRun = isset($options['--dry-run']);
       $files = (new Scaffolder())->generate($path, $spec, $dryRun, isset($options['--with-unit-test']));
 
       fwrite($stdout, json_encode(
-        ['id' => $id, 'files' => $files, 'dry_run' => $dryRun],
+        ['id' => $componentId, 'files' => $files, 'dry_run' => $dryRun],
         JSON_THROW_ON_ERROR | JSON_UNESCAPED_SLASHES,
       ) . "\n");
       return 0;

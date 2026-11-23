@@ -33,8 +33,8 @@ final class ComponentSpec {
   /**
    * Builds a component specification from its ID and JSON declaration.
    */
-  public static function fromJson(string $id, string $json): self {
-    if (!preg_match('/\A([a-z](?:[a-z0-9_]*[a-z0-9])?):([a-z](?:[a-z0-9_-]*[a-z0-9])?)\z/', $id, $matches)) {
+  public static function fromJson(string $componentId, string $json): self {
+    if (!preg_match('/\A([a-z](?:[a-z0-9_]*[a-z0-9])?):([a-z](?:[a-z0-9_-]*[a-z0-9])?)\z/', $componentId, $matches)) {
       throw new \InvalidArgumentException('Expected a lowercase provider:component ID, for example my_theme:teaser-card.');
     }
     [, $provider, $component] = $matches;
