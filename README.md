@@ -1,5 +1,6 @@
 # Drupal SDC skill
 
+[![Install on skills.sh](https://img.shields.io/badge/skills.sh-install-111111)](https://skills.sh/virtuoworks/drupal-sdc-skill/drupal-sdc-skill)
 [![Codacy code quality](https://app.codacy.com/project/badge/Grade/d773846add594697aafe319b70fc4cde)](https://app.codacy.com/gh/VirtuoWorks/drupal-sdc-skill/dashboard)
 [![Codacy code coverage](https://app.codacy.com/project/badge/Coverage/d773846add594697aafe319b70fc4cde)](https://app.codacy.com/gh/VirtuoWorks/drupal-sdc-skill/coverage)
 
