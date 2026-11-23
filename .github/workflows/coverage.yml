@@ -1,0 +1,35 @@
+name: PHP coverage
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Run tests and check coverage
+        run: composer test:coverage
+
+      - name: Upload coverage to Codacy
+        if: github.event_name == 'push' && github.repository == 'VirtuoWorks/drupal-sdc-skill' && env.CODACY_PROJECT_TOKEN != ''
+        env:
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        uses: codacy/codacy-coverage-reporter-action@v1.3.0
+        with:
+          project-token: ${{ env.CODACY_PROJECT_TOKEN }}
+          coverage-reports: .phpunit.cache/coverage.xml
