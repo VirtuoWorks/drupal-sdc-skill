@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleset name="Drupal SDC skill">
+  <description>Drupal coding standards for the scaffolder and its PHP tests.</description>
+  <file>scripts</file>
+  <file>tests</file>
+  <arg name="extensions" value="php"/>
+  <rule ref="Drupal"/>
+  <rule ref="DrupalPractice"/>
+</ruleset>

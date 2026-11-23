@@ -6,11 +6,19 @@
         "php": "^8.2"
     },
     "require-dev": {
+        "drupal/coder": "^9.0",
         "phpunit/phpunit": "^13.4",
         "symfony/yaml": "^8.1",
         "twig/twig": "^3.30"
     },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
     "scripts": {
+        "phpcs": "@php vendor/bin/phpcs",
+        "phpcbf": "@php vendor/bin/phpcbf",
         "test": "@php vendor/bin/phpunit",
         "test:coverage": [
             "@putenv XDEBUG_MODE=coverage",
