@@ -1,5 +1,8 @@
 # Drupal SDC skill
 
+[![Codacy code quality](https://app.codacy.com/project/badge/Grade/d773846add594697aafe319b70fc4cde)](https://app.codacy.com/gh/VirtuoWorks/drupal-sdc-skill/dashboard)
+[![Codacy code coverage](https://app.codacy.com/project/badge/Coverage/d773846add594697aafe319b70fc4cde)](https://app.codacy.com/gh/VirtuoWorks/drupal-sdc-skill/coverage)
+
 An agent skill for building and reviewing Drupal Single-Directory Components. Its PHP scaffolder generates typed component starters for Drupal 10.3+. The skill also covers legacy theme migration, duplicate detection, and Drupal version differences.
 
 ## Install
