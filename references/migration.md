@@ -19,6 +19,6 @@ For a teaser, the legacy `node--article--teaser.html.twig` can keep the Drupal w
 
 ## Verify and remove
 
-Render both paths with the same data, theme, language, and access context. Compare semantics, visible content, contextual links, classes and data attributes used by callers, and the attached libraries. Repeat with warm caches where cache behavior can differ, and test keyboard interaction and AJAX insertion if the component is interactive.
+Apply the [unit and end-to-end test requirements](authoring.md#test-the-component) to every SDC created or updated during migration. Render both paths with the same data, theme, language, and access context. Compare semantics, visible content, contextual links, classes and data attributes used by callers, and the attached libraries. Repeat with warm caches where cache behavior can differ, and test keyboard interaction and AJAX insertion if the component is interactive.
 
 Migrate additional callers in small groups. Search Twig, PHP, theme metadata, and exported configuration before deleting an old template, selector, library, or component ID. Treat dynamic names and stored configuration as unknown until confirmed. Keep the adapter when downstream consumers still depend on it.

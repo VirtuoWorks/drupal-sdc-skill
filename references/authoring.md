@@ -35,13 +35,13 @@ JSON
 
 Use `--help` for the input contract and `--dry-run` before the provider path to preview the file list. Omit the declaration for an empty prop schema and Twig wrapper. The command rejects existing destinations and IDs so it can be retried without replacing edits. It requires PHP 8.2+ and a filesystem that supports provider directory locking. [Agent Skills script guidance](https://agentskills.io/skill-creation/using-scripts)
 
-Use `--with-unit-test` when the project needs a PHPUnit starter. Run the generated file with the project's Drupal PHPUnit configuration. For example, with Drupal core's configuration and the web root shown above, run the following from the project root.
+Use `--with-unit-test` for new components. Run the generated unit test with the project's Drupal PHPUnit configuration. With Drupal core's configuration and the web root shown above, run this from the project root.
 
 ```sh
 vendor/bin/phpunit -c web/core/phpunit.xml.dist web/themes/custom/my_theme/tests/src/Unit/CardSdcTest.php
 ```
 
-The test checks the YAML contract and renders the Twig in isolation without a database. After adapting the component, pass representative props and assert its actual behavior. Use a project kernel test for Drupal component discovery, render arrays, library attachment, or bubbleable metadata. [Running PHPUnit tests](https://www.drupal.org/docs/develop/automated-testing/phpunit-in-drupal/running-phpunit-tests) · [Drupal core component rendering tests](https://api.drupal.org/api/drupal/core%21tests%21Drupal%21KernelTests%21Component%21ComponentRenderTest.php/main)
+The generated test checks the YAML contract and renders the Twig in isolation without a database. Adapt it as you implement the component and add the page-level assertions below. [Running PHPUnit tests](https://www.drupal.org/docs/develop/automated-testing/phpunit-in-drupal/running-phpunit-tests)
 
 Refine the generated `components/card/card.component.yml` with the allowed heading levels and meaningful input descriptions. This contract works with the APIs available in Drupal 10.3.
 
@@ -102,6 +102,14 @@ return [
   '#slots' => ['body' => $card_body],
 ];
 ```
+
+## Test the component
+
+Use the project's existing unit and end-to-end suites. A page test can cover several SDCs when it asserts the rendered behavior of each affected component. Use deterministic fixtures through the real Drupal caller or a representative Drupal test page.
+
+- **Unit tests** verify public features. Pass representative props and slots and assert the relevant defaults, variants, empty inputs, or edge cases. For the card, check that an omitted heading level renders an `h2` and that an empty summary renders cleanly. For style-only changes, run the existing feature tests and put the new layout or visibility assertion in the browser test.
+- **End-to-end tests** verify the affected output on a Drupal page. Assert visible content, semantic roles and accessible names, and the state the change is meant to produce. A Drupal functional test can verify server-rendered HTML. Use the project's real-browser suite for responsive layout, CSS visibility, keyboard interaction, JavaScript, and AJAX. For a responsive change, assert the expected layout on both sides of the affected breakpoint. For an AJAX change, interact with newly inserted markup and assert one action per interaction after behaviors reattach. [Drupal functional tests](https://www.drupal.org/docs/develop/automated-testing/phpunit-in-drupal/creating-functional-tests-simulated-browser) · [Drupal real-browser tests](https://www.drupal.org/docs/develop/automated-testing/phpunit-in-drupal/creating-functionaljavascript-tests-real-browser)
+- **Integration and efficiency checks** cover the changed behavior. Add a Drupal kernel assertion when component discovery, render arrays, library attachment, or cacheability needs focused coverage. For interactive changes, verify keyboard and focus behavior and use the project's accessibility tools. When assets change, build them and verify that the page receives the expected CSS and JS without duplicate delivery. When cache behavior changes, check cache contexts, tags, and max-age. Use the project's performance budget or comparable before-and-after measurements when performance is affected. [Drupal core component rendering tests](https://api.drupal.org/api/drupal/core%21tests%21Drupal%21KernelTests%21Components%21ComponentRenderTest.php/11.x) · [W3C accessibility evaluation](https://www.w3.org/WAI/test-evaluate/tools/) · [Drupal render cacheability](https://www.drupal.org/docs/drupal-apis/render-api/cacheability-of-render-arrays)
 
 ## Styles and behavior
 
