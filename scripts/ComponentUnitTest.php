@@ -7,25 +7,30 @@ namespace DrupalSdcSkill;
 /**
  * Renders a standalone PHPUnit test for a starter component.
  */
-final class ComponentUnitTest
-{
-    public const DIRECTORY = 'tests/src/Unit';
+final class ComponentUnitTest {
+  public const DIRECTORY = 'tests/src/Unit';
 
-    private readonly string $className;
+  /**
+   * The generated test class name without its namespace.
+   */
+  private readonly string $className;
 
-    public function __construct(private readonly ComponentSpec $spec, private readonly string $componentDirectory)
-    {
-        $this->className = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $spec->component))) . 'SdcTest';
-    }
+  public function __construct(private readonly ComponentSpec $spec, private readonly string $componentDirectory) {
+    $this->className = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $spec->component))) . 'SdcTest';
+  }
 
-    public function filename(): string
-    {
-        return $this->className . '.php';
-    }
+  /**
+   * Returns the filename for the generated PHPUnit test.
+   */
+  public function filename(): string {
+    return $this->className . '.php';
+  }
 
-    public function render(): string
-    {
-        $template = <<<'TEST'
+  /**
+   * Renders the PHPUnit test source for the declared component.
+   */
+  public function render(): string {
+    $template = <<<'TEST'
 <?php
 
 declare(strict_types=1);
@@ -101,24 +106,29 @@ final class @CLASS@ extends UnitTestCase {
 
 TEST;
 
-        return strtr($template, [
-            '@PROVIDER@' => $this->spec->provider,
-            '@COMPONENT@' => $this->spec->component,
-            '@CLASS@' => $this->className,
-            '@DIRECTORY@' => $this->componentDirectory,
-            '@PROPS@' => self::exportArray($this->spec->props),
-            '@REQUIRED@' => self::exportArray($this->spec->required),
-            '@SLOTS@' => self::exportArray($this->spec->slots),
-        ]);
-    }
+    return strtr($template, [
+      '@PROVIDER@' => $this->spec->provider,
+      '@COMPONENT@' => $this->spec->component,
+      '@CLASS@' => $this->className,
+      '@DIRECTORY@' => $this->componentDirectory,
+      '@PROPS@' => self::exportArray($this->spec->props),
+      '@REQUIRED@' => self::exportArray($this->spec->required),
+      '@SLOTS@' => self::exportArray($this->spec->slots),
+    ]);
+  }
 
-    /** @param array<array-key, string> $values */
-    private static function exportArray(array $values): string
-    {
-        $entries = [];
-        foreach ($values as $key => $value) {
-            $entries[] = (is_string($key) ? var_export($key, true) . ' => ' : '') . var_export($value, true);
-        }
-        return '[' . implode(', ', $entries) . ']';
+  /**
+   * Serializes prop or slot declarations as a PHP array literal.
+   *
+   * @param array<array-key, string> $values
+   *   The map or list to include in the test source.
+   *   */
+  private static function exportArray(array $values): string {
+    $entries = [];
+    foreach ($values as $key => $value) {
+      $entries[] = (is_string($key) ? var_export($key, TRUE) . ' => ' : '') . var_export($value, TRUE);
     }
+    return '[' . implode(', ', $entries) . ']';
+  }
+
 }

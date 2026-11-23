@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Runs the Drupal SDC scaffolder from the command line.
+ */
+
 declare(strict_types=1);
 
 use DrupalSdcSkill\ScaffoldCommand;

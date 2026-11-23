@@ -48,9 +48,12 @@ Run Composer with PHP 8.4.1 or later from the skill checkout to install the deve
 
 ```sh
 composer install
+composer phpcs
 composer test
 composer test:coverage
 ```
+
+Run `composer phpcbf` to fix Drupal coding standards violations automatically, then rerun `composer phpcs` to check for remaining violations.
 
 Use focused [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). For example, use `fix: preserve cache metadata in migration example` for a correction to the skill's behavior.
 
