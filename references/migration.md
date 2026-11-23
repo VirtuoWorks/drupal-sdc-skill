@@ -8,7 +8,7 @@ Record the data source, preprocess hooks, render arrays, attached libraries, and
 
 ## Extract the presentation
 
-1. Scaffold the SDC beside the existing theme templates. Keep entity access, data preparation, and translation in the caller. Pass structured values as props and visible fields as renderable slots.
+1. Use the [scaffolder](authoring.md#scaffold-a-card) when the migration needs a new SDC. Keep entity access, data preparation, and translation in the caller. Pass structured values as props and visible fields as renderable slots.
 2. Keep the old theme hook or Twig suggestion as an adapter. Preserve its contextual links and any surrounding markup the component does not own. Retain attributes used by CSS, JS, or Drupal, and keep existing public component IDs or give their callers a transition path.
 3. Keep cache contexts, tags, and max-age from values that influence the output. Preserve `#attached`, including libraries and `drupalSettings`. Leave field render arrays intact where possible so Drupal can render them and bubble metadata. If PHP extracts a scalar from an entity or field, preserve the relevant access result and cacheable dependencies on the parent render array.
 4. Move only selectors and behaviors owned by the component. Keep shared rules in the theme and declare dependencies explicitly. Verify any change in CSS order or in library timing, especially when a global library previously initialized an AJAX behavior.

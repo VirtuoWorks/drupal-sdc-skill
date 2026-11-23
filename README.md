@@ -1,6 +1,6 @@
 # Drupal SDC skill
 
-An agent skill for building and reviewing Drupal Single-Directory Components. It covers component contracts, CSS and SCSS builds, legacy theme migration, duplicate detection, and the Drupal version differences that affect implementation.
+An agent skill for building and reviewing Drupal Single-Directory Components. Its PHP scaffolder generates typed component starters for Drupal 10.3+. The skill also covers legacy theme migration, duplicate detection, and Drupal version differences.
 
 ## Install
 
@@ -18,7 +18,7 @@ mkdir -p ~/.agents/skills
 git clone git@github.com:VirtuoWorks/drupal-sdc-skill.git ~/.agents/skills/drupal-sdc-skill
 ```
 
-Keep the entire directory so the skill can load its references. Start Codex from the Drupal project. For other Agent Skills clients, use the skills directory that the client documents.
+Keep the entire directory so the skill can run its scripts and load its references. Start Codex from the Drupal project. For other Agent Skills clients, use the skills directory that the client documents.
 
 ## Use
 
@@ -28,9 +28,23 @@ Keep the entire directory so the skill can load its references. Start Codex from
 
 Read [SKILL.md](SKILL.md) for the entry point. The references cover [authoring and scaffolding](references/authoring.md), [legacy migration](references/migration.md), and [audits and architecture](references/auditing.md).
 
+Run the scaffolder directly from the Drupal project with PHP 8.2+.
+
+```sh
+php .agents/skills/drupal-sdc-skill/scripts/scaffold.php --help
+```
+
 ## Contribute
 
 Keep `SKILL.md` focused on deciding what to do and which reference to read. Put detailed steps and examples in the relevant reference. Cite Drupal documentation or core source for version-sensitive guidance. When changing an example, test it against the oldest Drupal version it claims to support when that runtime is available. Describe the checks and any version limits in the pull request.
+
+Use Composer from the skill checkout to install test dependencies. The coverage command requires Xdebug and fails below 100% executable PHP line coverage across the scaffolder.
+
+```sh
+composer install
+composer test
+composer test:coverage
+```
 
 Use focused [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/). For example, use `fix: preserve cache metadata in migration example` for a correction to the skill's behavior.
 

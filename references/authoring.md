@@ -24,7 +24,18 @@ Drupal's documentation distinguishes authoring rules from runtime validation. Us
 
 ## Scaffold a card
 
-The example uses `my_theme:card` and works with the APIs available in Drupal 10.3. Create `components/card/card.component.yml`.
+From the project root, run the bundled PHP CLI against the owning theme or module. Set `skill_dir` to the installed skill path and use the same base asset format as the project.
+
+```sh
+skill_dir=.agents/skills/drupal-sdc-skill
+php "$skill_dir/scripts/scaffold.php" web/themes/custom/my_theme my_theme:card - <<'JSON'
+{"description":"A titled content card.","props":{"title":"string","heading_level":"integer"},"required":["title"],"slots":["body"],"assets":["scss"]}
+JSON
+```
+
+Use `--help` for the input contract and `--dry-run` before the provider path to preview the file list. Omit the declaration for an empty prop schema and Twig wrapper. The command rejects existing destinations and IDs so it can be retried without replacing edits. It requires PHP 8.2+ and a filesystem that supports provider directory locking. [Agent Skills script guidance](https://agentskills.io/skill-creation/using-scripts)
+
+Refine the generated `components/card/card.component.yml` with the allowed heading levels and meaningful input descriptions. This contract works with the APIs available in Drupal 10.3.
 
 ```yaml
 name: Card
@@ -116,5 +127,3 @@ libraryOverrides:
 ```
 
 Use `replaces` in a theme's component metadata for a compatible component replacement. Confirm that both sides have schemas and that the replacement satisfies core's contract checks. For changes limited to upstream assets, use `libraries-override` or `libraries-extend` on the generated library as appropriate. [SDC FAQ](https://www.drupal.org/docs/develop/theming-drupal/using-single-directory-components/frequently-asked-questions) · [JavaScript API](https://www.drupal.org/docs/drupal-apis/javascript-api/javascript-api-overview)
-
-The [Akabia overview](https://akabia.fr/blog/drupal-11-single-directory-components-sdc-avantages) explains how colocated components support a design system. Use Drupal’s component creation guide for file naming and setup.
