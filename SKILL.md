@@ -7,7 +7,7 @@ description: Scaffold, migrate, and audit Drupal Single-Directory Components (SD
 
 Find the Drupal web root, owning theme or module, and supported core versions. Check existing components, caller conventions, and the asset build. Reuse a component when its contract fits.
 
-For a new component on Drupal 10.3+, run `php <skill-dir>/scripts/scaffold.php --help` and use the [scaffolder](scripts/scaffold.php) with PHP 8.2+. Pass a compact JSON declaration and use the returned file paths to add markup and behavior. Use the authoring reference when PHP is unavailable or the project needs a different contract.
+For a new component on Drupal 10.3+, run `php <skill-dir>/scripts/scaffold.php --help` and use the [scaffolder](scripts/scaffold.php) with PHP 8.2+. Pass a compact JSON declaration and use the returned file paths to add markup and behavior. Add `--with-unit-test` when the task calls for isolated Twig and contract tests. Use the authoring reference when PHP is unavailable or the project needs a different contract.
 
 Read only the reference relevant to the task.
 

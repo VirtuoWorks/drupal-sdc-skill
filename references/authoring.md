@@ -28,12 +28,20 @@ From the project root, run the bundled PHP CLI against the owning theme or modul
 
 ```sh
 skill_dir=.agents/skills/drupal-sdc-skill
-php "$skill_dir/scripts/scaffold.php" web/themes/custom/my_theme my_theme:card - <<'JSON'
+php "$skill_dir/scripts/scaffold.php" --with-unit-test web/themes/custom/my_theme my_theme:card - <<'JSON'
 {"description":"A titled content card.","props":{"title":"string","heading_level":"integer"},"required":["title"],"slots":["body"],"assets":["scss"]}
 JSON
 ```
 
 Use `--help` for the input contract and `--dry-run` before the provider path to preview the file list. Omit the declaration for an empty prop schema and Twig wrapper. The command rejects existing destinations and IDs so it can be retried without replacing edits. It requires PHP 8.2+ and a filesystem that supports provider directory locking. [Agent Skills script guidance](https://agentskills.io/skill-creation/using-scripts)
+
+Use `--with-unit-test` when the project needs a PHPUnit starter. Run the generated file with the project's Drupal PHPUnit configuration. For example, with Drupal core's configuration and the web root shown above, run the following from the project root.
+
+```sh
+vendor/bin/phpunit -c web/core/phpunit.xml.dist web/themes/custom/my_theme/tests/src/Unit/CardSdcTest.php
+```
+
+The test checks the YAML contract and renders the Twig in isolation without a database. After adapting the component, pass representative props and assert its actual behavior. Use a project kernel test for Drupal component discovery, render arrays, library attachment, or bubbleable metadata. [Running PHPUnit tests](https://www.drupal.org/docs/develop/automated-testing/phpunit-in-drupal/running-phpunit-tests) · [Drupal core component rendering tests](https://api.drupal.org/api/drupal/core%21tests%21Drupal%21KernelTests%21Component%21ComponentRenderTest.php/main)
 
 Refine the generated `components/card/card.component.yml` with the allowed heading levels and meaningful input descriptions. This contract works with the APIs available in Drupal 10.3.
 

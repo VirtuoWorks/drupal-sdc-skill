@@ -24,10 +24,23 @@ function flock($stream, int $operation): bool
 
 function fwrite($stream, string $contents): int|false
 {
-    if (FilesystemFaults::$operation === 'short-write' && str_ends_with(stream_get_meta_data($stream)['uri'], '.component.yml')) {
+    $suffix = match (FilesystemFaults::$operation) {
+        'short-write' => '.component.yml',
+        'test-short-write', 'cleanup-failure' => 'SdcTest.php',
+        default => null,
+    };
+    if ($suffix !== null && str_ends_with(stream_get_meta_data($stream)['uri'], $suffix)) {
         return \fwrite($stream, substr($contents, 0, 5));
     }
     return \fwrite($stream, $contents);
+}
+
+function unlink(string $path): bool
+{
+    if (FilesystemFaults::$operation === 'cleanup-failure' && str_ends_with($path, 'SdcTest.php')) {
+        return false;
+    }
+    return \unlink($path);
 }
 
 function file_get_contents(string $path): string|false

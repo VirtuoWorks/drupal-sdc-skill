@@ -34,6 +34,8 @@ Run the scaffolder directly from the Drupal project with PHP 8.2+.
 php .agents/skills/drupal-sdc-skill/scripts/scaffold.php --help
 ```
 
+Use `--with-unit-test` to include a PHPUnit test for the generated component's metadata and Twig.
+
 ## Contribute
 
 Keep `SKILL.md` focused on deciding what to do and which reference to read. Put detailed steps and examples in the relevant reference. Cite Drupal documentation or core source for version-sensitive guidance. When changing an example, test it against the oldest Drupal version it claims to support when that runtime is available. Describe the checks and any version limits in the pull request.

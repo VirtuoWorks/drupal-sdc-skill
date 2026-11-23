@@ -13,12 +13,13 @@ require_once __DIR__ . '/Scaffolder.php';
 
 final class ScaffoldCommand
 {
-    private const USAGE = 'Usage: php scaffold.php [--dry-run] <provider-dir> <provider:component> [<spec.json>|-]';
+    private const USAGE = 'Usage: php scaffold.php [--dry-run] [--with-unit-test] <provider-dir> <provider:component> [<spec.json>|-]';
 
     private const HELP = <<<'HELP'
 Generate a Drupal 10.3+ Single-Directory Component starter. Requires PHP 8.2+.
 Omit the spec for a minimal starter. Use - to read JSON from stdin.
 --dry-run checks the destination and lists paths without creating files.
+--with-unit-test adds an isolated Twig and metadata test to tests/src/Unit.
 
 Example spec:
 {"name":"Teaser card","description":"A compact article preview.","props":{"title":"string"},"required":["title"],"slots":["body"],"subdirectory":"cards","assets":["scss","js"]}
@@ -41,12 +42,16 @@ HELP;
             return 0;
         }
 
-        $dryRun = ($args[0] ?? null) === '--dry-run';
-        if ($dryRun) {
-            array_shift($args);
-        }
-
         try {
+            $options = [];
+            while (in_array($args[0] ?? null, ['--dry-run', '--with-unit-test'], true)) {
+                $option = array_shift($args);
+                if (isset($options[$option])) {
+                    throw new InvalidArgumentException("Option '$option' may only be supplied once.");
+                }
+                $options[$option] = true;
+            }
+
             if (count($args) < 2 || count($args) > 3 || str_starts_with($args[0], '--')) {
                 throw new InvalidArgumentException(self::USAGE);
             }
@@ -63,7 +68,8 @@ HELP;
             }
 
             $spec = ComponentSpec::fromJson($id, $json);
-            $files = (new Scaffolder())->generate($path, $spec, $dryRun);
+            $dryRun = isset($options['--dry-run']);
+            $files = (new Scaffolder())->generate($path, $spec, $dryRun, isset($options['--with-unit-test']));
 
             fwrite($stdout, json_encode(
                 ['id' => $id, 'files' => $files, 'dry_run' => $dryRun],

@@ -10,10 +10,12 @@ use RecursiveIteratorIterator;
 use RuntimeException;
 use Throwable;
 
+require_once __DIR__ . '/ComponentUnitTest.php';
+
 final class Scaffolder
 {
     /** @return list<string> Provider-relative file paths. */
-    public function generate(string $path, ComponentSpec $spec, bool $dryRun): array
+    public function generate(string $path, ComponentSpec $spec, bool $dryRun, bool $withUnitTest = false): array
     {
         $provider = realpath($path);
         if ($provider === false || !is_dir($provider) || !is_file("$provider/$spec->provider.info.yml")) {
@@ -22,15 +24,25 @@ final class Scaffolder
 
         $folders = ['components', ...$spec->subdirectories, $spec->component];
         $relative = implode('/', $folders);
-        $files = $this->renderFiles($spec);
-
-        if ($dryRun) {
-            $this->inspectDestination($provider, $folders, $spec->component);
-        } else {
-            $this->writeFiles($provider, $folders, $spec->component, $files);
+        $files = [];
+        foreach ($this->renderFiles($spec) as $filename => $contents) {
+            $files["$relative/$filename"] = $contents;
+        }
+        $testFilename = null;
+        if ($withUnitTest) {
+            $test = new ComponentUnitTest($spec, $relative);
+            $testFilename = $test->filename();
+            $files[ComponentUnitTest::DIRECTORY . '/' . $testFilename] = $test->render();
         }
 
-        return array_map(static fn (string $name): string => "$relative/$name", array_keys($files));
+        $inspect = fn (): array => $this->inspectDestination($provider, $folders, $spec->component, $testFilename);
+        if ($dryRun) {
+            $inspect();
+        } else {
+            $this->writeFiles($provider, $files, $inspect);
+        }
+
+        return array_keys($files);
     }
 
     /**
@@ -39,24 +51,9 @@ final class Scaffolder
      * @param list<string> $folders
      * @return list<string>
      */
-    private function inspectDestination(string $provider, array $folders, string $component): array
+    private function inspectDestination(string $provider, array $folders, string $component, ?string $testFilename): array
     {
-        $missing = [];
-        $directory = $provider;
-        foreach ($folders as $index => $folder) {
-            $directory .= "/$folder";
-            clearstatcache(true, $directory);
-            if (is_link($directory)) {
-                throw new RuntimeException("Refusing to use symlink '$directory'.");
-            }
-            if (!file_exists($directory)) {
-                $missing[] = $directory;
-                continue;
-            }
-            if (!is_dir($directory) || $index === array_key_last($folders)) {
-                throw new RuntimeException("Destination already exists at '$directory'.");
-            }
-        }
+        $missing = $this->inspectPath($provider, $folders, true);
 
         $root = "$provider/components";
         if (is_dir($root)) {
@@ -70,6 +67,38 @@ final class Scaffolder
             }
         }
 
+        if ($testFilename === null) {
+            return $missing;
+        }
+
+        $testFolders = explode('/', ComponentUnitTest::DIRECTORY);
+        return [...$missing, ...$this->inspectPath($provider, [...$testFolders, $testFilename], false)];
+    }
+
+    /**
+     * Check each path segment and return missing directories to create.
+     *
+     * @param list<string> $segments
+     * @return list<string>
+     */
+    private function inspectPath(string $directory, array $segments, bool $endsInDirectory): array
+    {
+        $missing = [];
+        $last = array_key_last($segments);
+        foreach ($segments as $index => $segment) {
+            $directory .= "/$segment";
+            clearstatcache(true, $directory);
+            if (is_link($directory)) {
+                throw new RuntimeException("Refusing to use symlink '$directory'.");
+            }
+            if (file_exists($directory)) {
+                if (!is_dir($directory) || $index === $last) {
+                    throw new RuntimeException("Destination already exists at '$directory'.");
+                }
+            } elseif ($endsInDirectory || $index !== $last) {
+                $missing[] = $directory;
+            }
+        }
         return $missing;
     }
 
@@ -146,10 +175,10 @@ JS;
     }
 
     /**
-     * @param list<string> $folders
-     * @param array<string, string> $files
+     * @param array<string, string> $files Provider-relative paths mapped to their contents.
+     * @param callable(): list<string> $inspect
      */
-    private function writeFiles(string $provider, array $folders, string $component, array $files): void
+    private function writeFiles(string $provider, array $files, callable $inspect): void
     {
         // Hold a lock on the existing provider so concurrent runs in different
         // groups cannot both claim the same component ID.
@@ -164,16 +193,15 @@ JS;
             if (!@flock($lock, LOCK_EX)) {
                 throw new RuntimeException("Cannot lock provider directory '$provider'.");
             }
-            foreach ($this->inspectDestination($provider, $folders, $component) as $directory) {
+            foreach ($inspect() as $directory) {
                 if (!@mkdir($directory)) {
                     throw new RuntimeException("Cannot create directory '$directory'.");
                 }
                 $createdDirectories[] = $directory;
             }
 
-            $target = $provider . '/' . implode('/', $folders);
             foreach ($files as $name => $contents) {
-                $file = "$target/$name";
+                $file = "$provider/$name";
                 $stream = @fopen($file, 'xb');
                 if ($stream === false) {
                     throw new RuntimeException("Cannot create file '$file'.");
@@ -186,11 +214,23 @@ JS;
                 }
             }
         } catch (Throwable $exception) {
+            $remaining = [];
             foreach (array_reverse($createdFiles) as $file) {
-                @unlink($file);
+                if (!@unlink($file) && file_exists($file)) {
+                    $remaining[] = $file;
+                }
             }
             foreach (array_reverse($createdDirectories) as $directory) {
-                @rmdir($directory);
+                if (!@rmdir($directory) && is_dir($directory)) {
+                    $remaining[] = $directory;
+                }
+            }
+            if ($remaining !== []) {
+                throw new RuntimeException(
+                    $exception->getMessage() . ' Could not clean up: ' . implode(', ', $remaining) . '.',
+                    0,
+                    $exception,
+                );
             }
             throw $exception;
         } finally {
