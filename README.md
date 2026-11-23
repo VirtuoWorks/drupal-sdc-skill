@@ -1,24 +1,26 @@
 # Drupal SDC skill
 
+[![Install on skills.sh](https://img.shields.io/badge/skills.sh-install-111111)](https://skills.sh/virtuoworks/drupal-sdc-skill/drupal-sdc-skill)
+[![Codacy code quality](https://app.codacy.com/project/badge/Grade/d773846add594697aafe319b70fc4cde)](https://app.codacy.com/gh/VirtuoWorks/drupal-sdc-skill/dashboard)
+[![Codacy code coverage](https://app.codacy.com/project/badge/Coverage/d773846add594697aafe319b70fc4cde)](https://app.codacy.com/gh/VirtuoWorks/drupal-sdc-skill/coverage)
+
 An agent skill for building and reviewing Drupal Single-Directory Components. Its PHP scaffolder generates typed component starters for Drupal 10.3+. The skill also covers legacy theme migration, duplicate detection, and Drupal version differences.
 
 ## Install
 
-From the root of your Drupal project, clone the skill into Codex's project skills directory. The SSH URL requires GitHub access to the repository.
+With Node.js 22.20 or later, run the following from your Drupal project root and select your agent when prompted.
 
 ```sh
-mkdir -p .agents/skills
-git clone git@github.com:VirtuoWorks/drupal-sdc-skill.git .agents/skills/drupal-sdc-skill
+npx skills add VirtuoWorks/drupal-sdc-skill --skill drupal-sdc-skill
 ```
 
-For a user-wide install, use the home directory instead.
+Add `-g` to make the skill available across your projects.
 
 ```sh
-mkdir -p ~/.agents/skills
-git clone git@github.com:VirtuoWorks/drupal-sdc-skill.git ~/.agents/skills/drupal-sdc-skill
+npx skills add VirtuoWorks/drupal-sdc-skill --skill drupal-sdc-skill -g
 ```
 
-Keep the entire directory so the skill can run its scripts and load its references. Start Codex from the Drupal project. For other Agent Skills clients, use the skills directory that the client documents.
+Pass `--agent codex` to select Codex directly. See the [skill on skills.sh](https://skills.sh/virtuoworks/drupal-sdc-skill/drupal-sdc-skill) for its listing and install command.
 
 ## Use
 
@@ -28,11 +30,13 @@ Keep the entire directory so the skill can run its scripts and load its referenc
 
 Read [SKILL.md](SKILL.md) for the entry point. The references cover [authoring and scaffolding](references/authoring.md), [legacy migration](references/migration.md), and [audits and architecture](references/auditing.md).
 
-Run the scaffolder directly from the Drupal project with PHP 8.2+.
+For a project install in Codex, run the scaffolder from your Drupal project with PHP 8.2+.
 
 ```sh
 php .agents/skills/drupal-sdc-skill/scripts/scaffold.php --help
 ```
+
+For a global install in Codex, use `~/.agents/skills/drupal-sdc-skill/scripts/scaffold.php` as the script path.
 
 Use `--with-unit-test` to include a PHPUnit test for the generated component's metadata and Twig.
 
