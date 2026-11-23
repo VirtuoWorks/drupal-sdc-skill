@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         cacheDirectory=".phpunit.cache">
+    <testsuites>
+        <testsuite name="Drupal SDC scaffolder">
+            <directory>tests</directory>
+            <file>tests/scaffold-help.phpt</file>
+        </testsuite>
+    </testsuites>
+    <source>
+        <include>
+            <directory>scripts</directory>
+        </include>
+    </source>
+    <coverage disableCodeCoverageIgnore="true"/>
+</phpunit>
